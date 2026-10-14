@@ -1,4 +1,15 @@
 "use strict";
+// Restore Elementor's original background photo slideshows without its server plugins.
+document.querySelectorAll('[data-settings]').forEach(section=>{
+ let settings;try{settings=JSON.parse(section.getAttribute('data-settings'));}catch{return;}
+ const photos=settings.background_slideshow_gallery;
+ if(settings.background_background!=='slideshow'||!Array.isArray(photos)||!photos.length)return;
+ const layer=document.createElement('div');layer.setAttribute('aria-hidden','true');layer.style.cssText='position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;pointer-events:none;';section.style.position='relative';section.prepend(layer);
+ const overlay=section.querySelector(':scope > .elementor-background-overlay');if(overlay)overlay.style.zIndex='1';
+ section.querySelectorAll(':scope > .elementor-container,:scope > .e-con-inner').forEach(content=>{content.style.position='relative';content.style.zIndex='2';});
+ let index=0;const show=()=>{layer.style.backgroundImage=`url("${photos[index].url}")`;};show();
+ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)setInterval(()=>{if(document.hidden)return;index=(index+1)%photos.length;show();},Number(settings.background_slideshow_slide_duration)||5000);
+});
 document.querySelectorAll('[data-archive-form]').forEach(form=>form.addEventListener('submit',event=>event.preventDefault()));
 const archiveMenu=document.querySelector('.archive-fallback-menu');
 const archivePopup=document.querySelector('.elementor-location-popup');
